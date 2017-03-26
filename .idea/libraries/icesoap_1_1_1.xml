@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="icesoap-1.1.1">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.alexgilleran/icesoap/1.1.1/e192dd1da54881aae62492c3e6a1a50b243b720a/icesoap-1.1.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.alexgilleran/icesoap/1.1.1/acb72458a7444231da66d93f2e9059fccc2ec0f2/icesoap-1.1.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
