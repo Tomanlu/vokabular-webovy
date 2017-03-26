@@ -1,1 +1,0 @@
-# vokabular-webovy
