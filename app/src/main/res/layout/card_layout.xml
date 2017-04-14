@@ -2,7 +2,7 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:card_view="http://schemas.android.com/tools">
     <data>
-        <import type="android.view.View" />
+        <import type="android.view.View"/>
         <variable
                 name="headword"
                 type="com.example.lukas.vokabularwebovy.models.Headword"/>
@@ -25,6 +25,7 @@
                     android:layout_height="wrap_content"
                     android:text="@{headword.headword}"
                     android:textSize="24sp"
+                    android:id="@+id/headword"
             />
             <ProgressBar
                     android:id="@+id/progressBar1"
@@ -37,7 +38,7 @@
             <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/dictionary"
+                    android:id="@+id/entry"
                     android:text="@{headword.entry}"
                     android:textSize="14sp"
                     android:visibility="@{headword.isImage || !headword.isReady ? View.GONE : View.VISIBLE }"

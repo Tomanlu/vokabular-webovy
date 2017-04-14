@@ -21,7 +21,8 @@ public class DictionaryEntryResponseObserver implements SOAP11Observer {
     @Override
     public void onCompletion(Request request) {
         DictionaryEntryByXmlId entry = (DictionaryEntryByXmlId) request.getResult();
-        headword.setEntry(entry.getDictionaryEntry());
+        if(headword.isInView())
+            headword.setEntry(entry.getDictionaryEntry());
         DataProvider.getInstance().addToCache(headword.getBookXmlId() + headword.getEntryXmlId(),entry.getDictionaryEntry());
 
     }

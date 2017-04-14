@@ -20,6 +20,7 @@ public class Headword extends BaseObservable {
     private Spanned entry;
     private boolean isImage;
     private boolean isReady;
+    private boolean isInView;
 
     public Headword(String headword, String bookXmlId, String entryXmlId, String image) {
         this.headword = headword;
@@ -94,6 +95,7 @@ public class Headword extends BaseObservable {
         isReady = true;
         notifyChange();
     }
+
     @Bindable
     public boolean isReady() {
         return isReady;
@@ -102,5 +104,13 @@ public class Headword extends BaseObservable {
     public void setReady(boolean ready) {
         isReady = ready;
         notifyChange();
+    }
+
+    public boolean isInView() {
+        return isInView;
+    }
+
+    public void setInView(boolean inView) {
+        isInView = inView;
     }
 }

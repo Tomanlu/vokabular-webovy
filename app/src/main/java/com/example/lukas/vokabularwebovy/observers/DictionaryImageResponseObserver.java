@@ -26,7 +26,8 @@ public class DictionaryImageResponseObserver implements SOAP11Observer {
     public void onCompletion(Request request) {
         HeadwordImage entry = (HeadwordImage) request.getResult();
         BitmapWorkerTask task = getTask();
-        task.execute(entry.getImage());
+        if(headword.isInView())
+            task.execute(entry.getImage());
         DataProvider.getInstance().addToCache(headword.getBookXmlId() + headword.getImageName(),entry.getImage());
     }
 
@@ -42,7 +43,8 @@ public class DictionaryImageResponseObserver implements SOAP11Observer {
         protected Void doInBackground(String... headwordImages) {
             byte[] decodedByte = Base64.decode(headwordImages[0], Base64.DEFAULT);
             Bitmap bitmap = BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
-            headword.setImg(bitmap);
+            if(headword.isInView())
+                headword.setImg(bitmap);
             return null;
         }
     }

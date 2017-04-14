@@ -3,34 +3,24 @@
 
     <group android:checkableBehavior="single">
         <item
-                android:id="@+id/nav_camera"
-                android:icon="@drawable/ic_menu_camera"
-                android:title="Import"/>
+                android:id="@+id/nav_informations"
+                android:icon="@drawable/ic_menu_information"
+                android:title="Informace"/>
         <item
-                android:id="@+id/nav_gallery"
-                android:icon="@drawable/ic_menu_gallery"
-                android:title="Gallery"/>
+                android:id="@+id/nav_list"
+                android:icon="@drawable/ic_menu_format_list_bullet"
+                android:title="Seznam"/>
         <item
-                android:id="@+id/nav_slideshow"
-                android:icon="@drawable/ic_menu_slideshow"
-                android:title="Slideshow"/>
+                android:id="@+id/nav_listing"
+                android:icon="@drawable/ic_menu_book_open_page"
+                android:title="Listování"/>
         <item
-                android:id="@+id/nav_manage"
-                android:icon="@drawable/ic_menu_manage"
-                android:title="Tools"/>
+                android:id="@+id/nav_searching"
+                android:icon="@drawable/ic_menu_magnify"
+                android:title="Vyhledávání"/>
+
     </group>
 
-    <item android:title="Communicate">
-        <menu>
-            <item
-                    android:id="@+id/nav_share"
-                    android:icon="@drawable/ic_menu_share"
-                    android:title="Share"/>
-            <item
-                    android:id="@+id/nav_send"
-                    android:icon="@drawable/ic_menu_send"
-                    android:title="Send"/>
-        </menu>
-    </item>
+
 
 </menu>
