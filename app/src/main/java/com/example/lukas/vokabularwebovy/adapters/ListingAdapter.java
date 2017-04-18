@@ -1,8 +1,13 @@
 package com.example.lukas.vokabularwebovy.adapters;
 
+import android.support.transition.TransitionManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import com.example.lukas.vokabularwebovy.R;
 import com.example.lukas.vokabularwebovy.databinding.CardLayoutBinding;
 import com.example.lukas.vokabularwebovy.dataproviders.DataProvider;
 import com.example.lukas.vokabularwebovy.holders.HeadwordHolder;
@@ -28,20 +33,22 @@ private RecyclerView rv;
     }
 
     @Override
-    public void onBindViewHolder(HeadwordHolder holder, int position) {
+    public void onBindViewHolder(final HeadwordHolder holder, final int position) {
         Headword headword = dataProvider.getHeadwordFromList(position);
         holder.binding.setHeadword(headword);
-      /*  final boolean isExpanded = position==mExpandedPosition;
-        holder.binding.entry.setVisibility(isExpanded ? View.VISIBLE: View.GONE);
+        final LinearLayout entry = (LinearLayout) holder.itemView.findViewById(R.id.content);
+        final boolean isExpanded = position==mExpandedPosition;
+        entry.setVisibility(isExpanded?View.VISIBLE:View.GONE);
         holder.itemView.setActivated(isExpanded);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mExpandedPosition = isExpanded ? -1:position;
-                TransitionManager.beginDelayedTransition(rv);
+               // TransitionManager.beginDelayedTransition(rv);
                 notifyDataSetChanged();
             }
-        });*/
+        });
+
 
     }
 //snapzdb

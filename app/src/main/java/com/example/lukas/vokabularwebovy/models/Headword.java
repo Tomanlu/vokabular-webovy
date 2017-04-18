@@ -14,6 +14,7 @@ public class Headword extends BaseObservable {
 
     private String headword;
     private String bookXmlId;
+    private String bookName;
     private String entryXmlId;
     private String imageName;
     private Bitmap img;
@@ -22,10 +23,11 @@ public class Headword extends BaseObservable {
     private boolean isReady;
     private boolean isInView;
 
-    public Headword(String headword, String bookXmlId, String entryXmlId, String image) {
+    public Headword(String headword, String bookXmlId, String bookName, String entryXmlId, String image) {
         this.headword = headword;
         this.bookXmlId = bookXmlId;
         this.entryXmlId = entryXmlId;
+        this.bookName = bookName;
         this.imageName = image;
         this.isImage = (image != null);
         this.img = null;
@@ -47,6 +49,14 @@ public class Headword extends BaseObservable {
 
     public void setBookXmlId(String bookXmlId) {
         this.bookXmlId = bookXmlId;
+    }
+
+    public String getBookName() {
+        return bookName;
+    }
+
+    public void setBookName(String bookName) {
+        this.bookName = bookName;
     }
 
     public String getEntryXmlId() {

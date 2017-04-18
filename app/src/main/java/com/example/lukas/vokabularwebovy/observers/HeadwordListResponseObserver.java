@@ -5,10 +5,7 @@ import com.alexgilleran.icesoap.exception.SOAPException;
 import com.alexgilleran.icesoap.observer.SOAP11Observer;
 import com.alexgilleran.icesoap.request.Request;
 import com.example.lukas.vokabularwebovy.dataproviders.DataProvider;
-import com.example.lukas.vokabularwebovy.models.Headword;
-import com.example.lukas.vokabularwebovy.models.HeadwordBookInfoContract;
-import com.example.lukas.vokabularwebovy.models.HeadwordEntry;
-import com.example.lukas.vokabularwebovy.models.HeadwordList;
+import com.example.lukas.vokabularwebovy.models.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,24 +28,24 @@ public class HeadwordListResponseObserver implements SOAP11Observer {
         HeadwordList list = (HeadwordList) request.getResult();
 
         List<Headword> tmpList = new ArrayList<>();
-        for(HeadwordEntry headwordEntry : list.getHeadwordEntries()){
-            for(HeadwordBookInfoContract bookInfoContract : headwordEntry.getBookInfo()){
-                    if(bookInfoContract.getImage() != null && bookInfoContract.getImage() != " ") {
-                        Headword headword = new Headword(headwordEntry.getHeadword(), bookInfoContract.getBookXmlId(),null, bookInfoContract.getImage());
-                        tmpList.add(headword);
-                    }
-                    else {
-                        Headword headword = new Headword(headwordEntry.getHeadword(), bookInfoContract.getBookXmlId(),bookInfoContract.getEntryXmlId(), null);
-                        tmpList.add(headword);
-                    }
+        for (HeadwordEntry headwordEntry : list.getHeadwordEntries()) {
+            for (HeadwordBookInfoContract bookInfoContract : headwordEntry.getBookInfo()) {
+                String bookTitle = getBookTitleFromXmlId(list.getDictionaries(), bookInfoContract.getBookXmlId());
+                if (bookInfoContract.getImage() != null && bookInfoContract.getImage() != " ") {
+                    Headword headword = new Headword(headwordEntry.getHeadword(), bookInfoContract.getBookXmlId(), bookTitle, null, bookInfoContract.getImage());
+                    tmpList.add(headword);
+                } else {
+                    Headword headword = new Headword(headwordEntry.getHeadword(), bookInfoContract.getBookXmlId(), bookTitle, bookInfoContract.getEntryXmlId(), null);
+                    tmpList.add(headword);
+                }
             }
 
         }
 
-        if(swipeContainer != null){
+        if (swipeContainer != null) {
             DataProvider.getInstance().addAllToList(tmpList, true);
             swipeContainer.setRefreshing(false);
-        }else{
+        } else {
             DataProvider.getInstance().addAllToList(tmpList, false);
 
         }
@@ -56,6 +53,14 @@ public class HeadwordListResponseObserver implements SOAP11Observer {
 
     }
 
+    private String getBookTitleFromXmlId(List<Dictionary> dictionaries, String XmlId) {
+        for (Dictionary dictionary : dictionaries) {
+            if (dictionary.getKey() == XmlId)
+                return dictionary.getBookTitle();
+
+        }
+        return null;
+    }
 
 
     @Override
