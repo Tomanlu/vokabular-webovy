@@ -85,13 +85,38 @@ public final class DataProvider {
 
     }
 
+    public void searchHeadwordByCriteria(SOAP11Observer observer, int start, int count, String text, boolean isFullText) {
+        Map<String, String> resultCriterias = new LinkedHashMap<>();
+
+        Map<String, String> selectedCategoriesCriterias = new LinkedHashMap<>();
+        resultCriterias.put("Count", Integer.toString(count));
+        resultCriterias.put("Start", Integer.toString(start));
+        resultCriterias.put("Direction", "Ascending");
+
+        if (checkedDictionaries != null) {
+            for (int i = 0; i < checkedDictionaries.length; i++) {
+                if (checkedDictionaries[i]) {
+                    selectedCategoriesCriterias.put(dictionaryList.get(i).getId(), "long");
+                }
+            }
+        }
+        Envelope en = new Envelope(resultCriterias, text, selectedCategoriesCriterias, isFullText);
+        SOAP11Request<HeadwordList> definitionRequest = requestFactory.buildRequest(
+                URL,
+                en,
+                "http://tempuri.org/IItJakubService/SearchHeadwordByCriteria",
+                HeadwordList.class);
+        definitionRequest.registerObserver(observer);
+        definitionRequest.execute();
+    }
+
     public void getHeadwordList(SOAP11Observer observer, int start, int count) {
         Map<String, String> nodes = new LinkedHashMap<>();
         Map<String, String> subNodes = new LinkedHashMap<>();
-        if(checkedDictionaries != null){
-            for(int i = 0; i < checkedDictionaries.length; i++) {
-                if(checkedDictionaries[i]){
-                    subNodes.put(dictionaryList.get(i).getId(), "long" );
+        if (checkedDictionaries != null) {
+            for (int i = 0; i < checkedDictionaries.length; i++) {
+                if (checkedDictionaries[i]) {
+                    subNodes.put(dictionaryList.get(i).getId(), "long");
                 }
             }
         }
@@ -152,6 +177,28 @@ public final class DataProvider {
         }
     }
 
+    public void getDictionaryEntryFromSearch(Headword headword, String text) {
+        String entry = listEntryCache.getItem(headword.getBookXmlId() + headword.getEntryXmlId());
+        if (entry != null) {
+            headword.setEntry(entry);
+        } else {
+            Map<String, String> nodes = new LinkedHashMap<>();
+            nodes.put("bookGuid", headword.getBookXmlId());
+            nodes.put("xmlEntryId", headword.getEntryXmlId());
+            nodes.put("resultFormat", "Html");
+            nodes.put("bookType", "Dictionary");
+            Envelope en = new Envelope("GetDictionaryEntryFromSearch", nodes, text);
+            SOAP11Request<DictionaryEntryFromSearch> definitionRequest = requestFactory.buildRequest(
+                    URL,
+                    en,
+                    "http://tempuri.org/IItJakubService/GetDictionaryEntryFromSearch",
+                    DictionaryEntryFromSearch.class);
+            DictionaryEntryFromSearchResponseObserver observer = new DictionaryEntryFromSearchResponseObserver(headword);
+            definitionRequest.registerObserver(observer);
+            definitionRequest.execute();
+        }
+    }
+
     public void getTypeheadHeadword(SOAP11Observer observer, String query) {
         Map<String, String> nodes = new LinkedHashMap<>();
         nodes.put("query", query);
@@ -190,10 +237,11 @@ public final class DataProvider {
         adapter.notifyDataSetChanged();
     }
 
-public void addAllToList(List<Headword> list){
-    headwordList.addAll(list);
-    adapter.notifyDataSetChanged();
-}
+    public void addAllToList(List<Headword> list) {
+        headwordList.addAll(list);
+        adapter.notifyDataSetChanged();
+    }
+
     public void addToList(Headword headword) {
         headwordList.add(headword);
         adapter.notifyDataSetChanged();
@@ -223,32 +271,35 @@ public void addAllToList(List<Headword> list){
 
     }
 
-    public void setCheckedDictionaries(boolean[] checkedDictionaries){
+    public void setCheckedDictionaries(boolean[] checkedDictionaries) {
+        if(checkedDictionaries == null)return;
         this.checkedDictionaries = checkedDictionaries;
         headwordList.clear();
         adapter.notifyDataSetChanged();
         getHeadwordList(new HeadwordListResponseObserver(), 0, 20);
     }
-    public int getDictionaryListSize(){
+
+    public int getDictionaryListSize() {
         return this.dictionaryList.size();
     }
-    public boolean[] getCheckedDictionaries(){
+
+    public boolean[] getCheckedDictionaries() {
 
         return this.checkedDictionaries;
     }
 
-    public void addItemAndSaveSearchHistory(String newItem, Context context){
+    public void addItemAndSaveSearchHistory(String newItem, Context context) {
         List<String> history = getSearchHistory(context);
         SharedPreferences sharedPref = context.getSharedPreferences("history", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         StringBuilder historyList = new StringBuilder();
-        if(!history.contains(newItem)){
+        if (!history.contains(newItem)) {
             history.add(0, newItem);
         }
         int stop = history.size() > 5 ? 5 : history.size();
-        for(int i = 0; i < stop; i++){
+        for (int i = 0; i < stop; i++) {
             historyList.append(history.get(i));
-            if(i != stop-1){
+            if (i != stop - 1) {
                 historyList.append(',');
             }
         }
@@ -256,13 +307,14 @@ public void addAllToList(List<Headword> list){
         editor.putString("history", historyList.toString());
         editor.commit();
     }
+
     public List<String> getSearchHistory(Context context) {
-         SharedPreferences sharedPreferences = context.getSharedPreferences("history", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("history", Context.MODE_PRIVATE);
         String historyList = sharedPreferences.getString("history", null);
-        if(historyList == null) return new ArrayList<>();
+        if (historyList == null) return new ArrayList<>();
         String[] items = historyList.split(",");
-       List<String> list = new ArrayList<>();
-        for(int i=0; i < items.length; i++){
+        List<String> list = new ArrayList<>();
+        for (int i = 0; i < items.length; i++) {
             list.add(items[i]);
         }
         return list;

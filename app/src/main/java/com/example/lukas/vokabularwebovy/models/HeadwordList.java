@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by lukas on 12.03.2017.
  */
-@XMLObject("//GetHeadwordListResponse")
+@XMLObject("//Body")
 public class HeadwordList {
     @XMLField("//KeyValueOfstringDictionaryContractogreX8G6")
     private List<Dictionary> dictionaries;

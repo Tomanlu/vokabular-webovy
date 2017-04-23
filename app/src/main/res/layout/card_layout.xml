@@ -57,9 +57,11 @@
                     android:visibility="@{headword.isImage || !headword.isReady ? View.GONE : View.VISIBLE }"
 
             />
+
             <ImageView android:layout_width="wrap_content"
                        android:layout_height="wrap_content"
                        android:id="@+id/image"
+                       android:adjustViewBounds="true"
                        android:src="@{headword.img}"
                        android:visibility="@{headword.isImage || headword.isReady ? View.VISIBLE : View.GONE}"
             />

@@ -13,12 +13,14 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import com.example.lukas.vokabularwebovy.MainActivity;
 import com.example.lukas.vokabularwebovy.R;
 import com.example.lukas.vokabularwebovy.adapters.ListingAdapter;
 import com.example.lukas.vokabularwebovy.dataproviders.DataProvider;
 import com.example.lukas.vokabularwebovy.listeners.EndlessRecyclerViewScrollListener;
 import com.example.lukas.vokabularwebovy.observers.HeadwordListResponseObserver;
+import uk.co.senab.photoview.PhotoViewAttacher;
 
 /**
  * Created by lukas on 26.03.2017.
@@ -83,7 +85,7 @@ public class ListingFragment extends Fragment {
         rv.setOnScrollListener(scrollListener);
         rv.addOnScrollListener(scrollListener);
 
-        adapter = new ListingAdapter();
+        adapter = new ListingAdapter(this);
         rv.setHasFixedSize(true);
         rv.setItemViewCacheSize(20);
         rv.setDrawingCacheEnabled(true);
