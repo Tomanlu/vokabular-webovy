@@ -28,6 +28,7 @@ public class HeadwordListResponseObserver implements SOAP11Observer {
         HeadwordList list = (HeadwordList) request.getResult();
 
         List<Headword> tmpList = new ArrayList<>();
+        if(list == null || list.getHeadwordEntries() == null)return;
         for (HeadwordEntry headwordEntry : list.getHeadwordEntries()) {
             for (HeadwordBookInfoContract bookInfoContract : headwordEntry.getBookInfo()) {
                 String bookTitle = getBookTitleFromXmlId(list.getDictionaries(), bookInfoContract.getBookXmlId());

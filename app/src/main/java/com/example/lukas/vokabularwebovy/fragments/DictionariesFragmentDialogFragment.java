@@ -28,11 +28,7 @@ public class DictionariesFragmentDialogFragment extends DialogFragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which,
                                                 boolean isChecked) {
-                                if (isChecked) {
-                                    mSelectedItems[which] = true;
-                                } else{
-                                    mSelectedItems[which] = false;
-                                }
+                                mSelectedItems[which] = isChecked;
                             }
                         })
                 // Set the action buttons

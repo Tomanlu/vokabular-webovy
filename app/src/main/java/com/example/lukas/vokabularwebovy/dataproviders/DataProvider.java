@@ -29,7 +29,7 @@ public final class DataProvider {
     private List<DictionaryWithCategories> dictionaryList;
     private CacheDataProvider<String, String> listEntryCache;
     private boolean[] checkedDictionaries;
-
+    private String searchText;
     ListingAdapter adapter;
 
     private DataProvider() {
@@ -85,7 +85,7 @@ public final class DataProvider {
 
     }
 
-    public void searchHeadwordByCriteria(SOAP11Observer observer, int start, int count, String text, boolean isFullText) {
+    public void searchHeadwordByCriteria(SOAP11Observer observer, int start, int count, boolean isFullText) {
         Map<String, String> resultCriterias = new LinkedHashMap<>();
 
         Map<String, String> selectedCategoriesCriterias = new LinkedHashMap<>();
@@ -100,7 +100,7 @@ public final class DataProvider {
                 }
             }
         }
-        Envelope en = new Envelope(resultCriterias, text, selectedCategoriesCriterias, isFullText);
+        Envelope en = new Envelope(resultCriterias, searchText, selectedCategoriesCriterias, isFullText);
         SOAP11Request<HeadwordList> definitionRequest = requestFactory.buildRequest(
                 URL,
                 en,
@@ -306,6 +306,7 @@ public final class DataProvider {
 
         editor.putString("history", historyList.toString());
         editor.commit();
+        searchText = newItem;
     }
 
     public List<String> getSearchHistory(Context context) {
