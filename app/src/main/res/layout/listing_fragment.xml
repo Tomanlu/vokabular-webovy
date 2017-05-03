@@ -2,7 +2,8 @@
 <LinearLayout
         android:layout_height="match_parent"
         xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent" android:orientation="vertical">
+        android:layout_width="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical">
             <LinearLayout
                     android:orientation="horizontal"
                     android:layout_width="match_parent"
@@ -28,7 +29,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/listing_rv"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:scrollbars="vertical"/>
+
+
     </android.support.v4.widget.SwipeRefreshLayout>
+    <ProgressBar
+            android:id="@+id/listing_progressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:visibility="visible" />
 </LinearLayout>

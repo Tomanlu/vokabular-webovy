@@ -1,11 +1,7 @@
 package com.example.lukas.vokabularwebovy.fragments;
 
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.app.ActionBar;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.view.ViewPager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -15,11 +11,11 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import com.example.lukas.vokabularwebovy.ListType;
 import com.example.lukas.vokabularwebovy.MainActivity;
 import com.example.lukas.vokabularwebovy.R;
 import com.example.lukas.vokabularwebovy.adapters.HintsAdapter;
 import com.example.lukas.vokabularwebovy.adapters.HistoryAdapter;
-import com.example.lukas.vokabularwebovy.adapters.ViewPagerAdapter;
 import com.example.lukas.vokabularwebovy.dataproviders.DataProvider;
 import com.example.lukas.vokabularwebovy.observers.TypeheadHeadwordsObserver;
 
@@ -72,9 +68,10 @@ public class SearchFragment extends Fragment {
             public void onClick(View view) {
                 ((MainActivity)getActivity()).hideSoftKeyboard();
                 String text = et.getText().toString();
-                dataProvider.addItemAndSaveSearchHistory(text, getContext());
+                dataProvider.setSearchQuery(text, getContext());
+
                 MainActivity activity = (MainActivity)getActivity();
-               activity.setFragment(new BasicHeadwordSearchFragment(),"Vyhledávání", true);
+                activity.setFragment(new SearchResultFragment(),"Vyhledávání");
             }
         });
         et.addTextChangedListener(new TextWatcher() {
@@ -96,10 +93,5 @@ public class SearchFragment extends Fragment {
         hints = (ListView) view.findViewById(R.id.hint_lv);
         return view;
     }
-    private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getActivity().getSupportFragmentManager());
-        adapter.addFragment(new BasicHeadwordSearchFragment(), "Hesla");
-        adapter.addFragment(new FullTextSearchFragment(), "Fulltext");
-        viewPager.setAdapter(adapter);
-    }
+
 }

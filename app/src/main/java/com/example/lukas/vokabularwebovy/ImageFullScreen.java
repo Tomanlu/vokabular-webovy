@@ -120,7 +120,7 @@ public class ImageFullScreen extends AppCompatActivity {
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
         findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
-        Headword headword = DataProvider.getInstance().getHeadwordFromList(getIntent().getIntExtra("position", -1));
+        Headword headword = DataProvider.getInstance().getHeadwordFromList(getIntent().getIntExtra("position", -1),(ListType)getIntent().getSerializableExtra("listType"));
 
         ImageView mImageView = (ImageView) findViewById(R.id.fullscreen_content);
         mImageView.setImageBitmap(headword.getImg());

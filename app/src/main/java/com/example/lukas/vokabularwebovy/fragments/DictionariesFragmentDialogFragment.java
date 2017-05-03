@@ -17,13 +17,14 @@ public class DictionariesFragmentDialogFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final boolean[] mSelectedItems = DataProvider.getInstance().getCheckedDictionaries();  // Where we track the selected items
+        final DataProvider dataProvider = DataProvider.getInstance();
+        final String[] dictionaries =  dataProvider.getDictionaryListAsStringArray();
+        final boolean[] mSelectedItems = dataProvider.getCheckedDictionaries();
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         builder.setTitle(R.string.dictionaries)
-                // Specify the list array, the items to be selected by default (null for none),
-                // and the listener through which to receive callbacks when items are selected
-                .setMultiChoiceItems(DataProvider.getInstance().getDictionaryListAsStringArray(), mSelectedItems,
+
+                .setMultiChoiceItems(dictionaries, mSelectedItems,
                         new DialogInterface.OnMultiChoiceClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which,
@@ -31,11 +32,10 @@ public class DictionariesFragmentDialogFragment extends DialogFragment {
                                 mSelectedItems[which] = isChecked;
                             }
                         })
-                // Set the action buttons
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        DataProvider.getInstance().setCheckedDictionaries(mSelectedItems);
+                        dataProvider.setCheckedDictionaries(mSelectedItems);
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

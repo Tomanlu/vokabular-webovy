@@ -3,39 +3,45 @@ package com.example.lukas.vokabularwebovy.dataproviders;
 import android.content.Context;
 import android.content.SharedPreferences;
 import com.alexgilleran.icesoap.observer.SOAP11Observer;
-import com.alexgilleran.icesoap.request.RequestFactory;
-import com.alexgilleran.icesoap.request.SOAP11Request;
-import com.alexgilleran.icesoap.request.impl.RequestFactoryImpl;
+import com.example.lukas.vokabularwebovy.ListType;
 import com.example.lukas.vokabularwebovy.adapters.ListingAdapter;
-import com.example.lukas.vokabularwebovy.fragments.DictionariesFragmentDialogFragment;
-import com.example.lukas.vokabularwebovy.listeners.EndlessRecyclerViewScrollListener;
+import com.example.lukas.vokabularwebovy.listeners.DictionarySetChangedListener;
 import com.example.lukas.vokabularwebovy.models.*;
 import com.example.lukas.vokabularwebovy.observers.*;
-import com.example.lukas.vokabularwebovy.requests.Envelope;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by lukas on 14.03.2017.
  */
 public final class DataProvider {
-    private final String URL = "http://censeo.felk.cvut.cz/ITJakub.ITJakubService/ItJakubService.svc";
     private static DataProvider instance = null;
-    private RequestFactory requestFactory;
+    private static ServerDataProvider serverDataProvider;
     private List<Headword> headwordList;
+    private List<Headword> headwordBasicSearchList;
+    private List<Headword> headwordFullTextSearchList;
+
     private List<DictionaryWithCategories> dictionaryList;
     private CacheDataProvider<String, String> listEntryCache;
     private boolean[] checkedDictionaries;
-    private String searchText;
-    ListingAdapter adapter;
+    private String query;
+
+    private ListingAdapter headwordListAdapter;
+    private ListingAdapter headwordBasicSearchListAdapter;
+    private ListingAdapter headwordFullTextSearchListAdapter;
+
+    private DictionarySetChangedListener headwordListListener;
+    private DictionarySetChangedListener headwordBasicSearchListListener;
+    private DictionarySetChangedListener headwordFullTextSearchListListener;
 
     private DataProvider() {
         headwordList = new ArrayList<>();
+        headwordBasicSearchList = new ArrayList<>();
+        headwordFullTextSearchList = new ArrayList<>();
+        serverDataProvider = ServerDataProvider.getInstance();
         dictionaryList = new ArrayList<>();
-        requestFactory = new RequestFactoryImpl();
         listEntryCache = new CacheDataProvider<>();
     }
 
@@ -44,251 +50,215 @@ public final class DataProvider {
         return instance;
     }
 
-    public void getDictionariesWithCategories() {
-        Map<String, String> nodes = new LinkedHashMap<>();
-        nodes.put("bookType", "Dictionary");
-        Envelope en = new Envelope("GetBooksWithCategoriesByBookType", nodes);
-        SOAP11Request<DictionariesWithCategories> definitionRequest = requestFactory.buildRequest(
-                URL,
-                en,
-                "http://tempuri.org/IItJakubService/GetBooksWithCategoriesByBookType",
-                DictionariesWithCategories.class);
-        definitionRequest.registerObserver(new DictionariesWithCategoriesResponseObserver());
-        definitionRequest.execute();
-    }
-
     public void getHeadwordCount(SOAP11Observer observer) {
-        Map<String, String> nodes = new LinkedHashMap<>();
-        nodes.put("bookType", "Dictionary");
-        Envelope en = new Envelope("GetHeadwordCount", nodes);
-        SOAP11Request<HeadwordCount> definitionRequest = requestFactory.buildRequest(
-                URL,
-                en,
-                "http://tempuri.org/IItJakubService/GetHeadwordCount",
-                HeadwordCount.class);
-        definitionRequest.registerObserver(observer);
-        definitionRequest.execute();
+        serverDataProvider.getHeadwordCount(observer);
     }
 
-    public void getHeadwordRowNumber(EndlessRecyclerViewScrollListener scrollListener, String query) {
-        Map<String, String> nodes = new LinkedHashMap<>();
-        nodes.put("query", query);
-        nodes.put("bookType", "Dictionary");
-        Envelope en = new Envelope("GetHeadwordRowNumber", nodes);
-        SOAP11Request<HeadwordRowNumber> definitionRequest = requestFactory.buildRequest(
-                URL,
-                en,
-                "http://tempuri.org/IItJakubService/GetHeadwordRowNumber",
-                HeadwordRowNumber.class);
-        definitionRequest.registerObserver(new HeadwordRowEntryResponseObserver(adapter, scrollListener));
-        definitionRequest.execute();
-
-    }
-
-    public void searchHeadwordByCriteria(SOAP11Observer observer, int start, int count, boolean isFullText) {
-        Map<String, String> resultCriterias = new LinkedHashMap<>();
-
-        Map<String, String> selectedCategoriesCriterias = new LinkedHashMap<>();
-        resultCriterias.put("Count", Integer.toString(count));
-        resultCriterias.put("Start", Integer.toString(start));
-        resultCriterias.put("Direction", "Ascending");
-
-        if (checkedDictionaries != null) {
-            for (int i = 0; i < checkedDictionaries.length; i++) {
-                if (checkedDictionaries[i]) {
-                    selectedCategoriesCriterias.put(dictionaryList.get(i).getId(), "long");
-                }
-            }
-        }
-        Envelope en = new Envelope(resultCriterias, searchText, selectedCategoriesCriterias, isFullText);
-        SOAP11Request<HeadwordList> definitionRequest = requestFactory.buildRequest(
-                URL,
-                en,
-                "http://tempuri.org/IItJakubService/SearchHeadwordByCriteria",
-                HeadwordList.class);
-        definitionRequest.registerObserver(observer);
-        definitionRequest.execute();
+    public void getDictionariesWithCategories() {
+        serverDataProvider.getDictionariesWithCategories();
     }
 
     public void getHeadwordList(SOAP11Observer observer, int start, int count) {
-        Map<String, String> nodes = new LinkedHashMap<>();
-        Map<String, String> subNodes = new LinkedHashMap<>();
-        if (checkedDictionaries != null) {
-            for (int i = 0; i < checkedDictionaries.length; i++) {
-                if (checkedDictionaries[i]) {
-                    subNodes.put(dictionaryList.get(i).getId(), "long");
-                }
-            }
-        }
-        nodes.put("start", Integer.toString(start));
-        nodes.put("count", Integer.toString(count));
-        nodes.put("bookType", "Dictionary");
-        Envelope en = new Envelope("GetHeadwordList", nodes, "selectedBookIds", subNodes);
-        SOAP11Request<HeadwordList> definitionRequest = requestFactory.buildRequest(
-                URL,
-                en,
-                "http://tempuri.org/IItJakubService/GetHeadwordList",
-                HeadwordList.class);
-        definitionRequest.registerObserver(observer);
-        definitionRequest.execute();
+        serverDataProvider.getHeadwordList(observer, start, count, getCheckedDictionariesAsList());
     }
 
-    public void getHeadwordImage(Headword headword) {
+    public void getHeadwordRowNumber(SOAP11Observer observer, String query) {
+        serverDataProvider.getHeadwordRowNumber(observer, query);
+    }
+
+    public void searchHeadwordByCriteria(SOAP11Observer observer, int start, int count, ListType listType) {
+        if (listType == ListType.headwordFullTextSearchList)
+            serverDataProvider.searchHeadwordByCriteria(observer, start, count, query, true, getCheckedDictionariesAsList());
+        else
+            serverDataProvider.searchHeadwordByCriteria(observer, start, count, query, false, getCheckedDictionariesAsList());
+
+    }
+
+    public void getTypeheadHeadword(SOAP11Observer observer, String query) {
+        serverDataProvider.getTypeheadHeadword(observer, query);
+    }
+
+    public void getHeadwordImageByXmlId(Headword headword) {
         String entry = listEntryCache.getItem(headword.getBookXmlId() + headword.getImageName());
         DictionaryImageResponseObserver observer = new DictionaryImageResponseObserver(headword);
         if (entry != null) {
             DictionaryImageResponseObserver.BitmapWorkerTask task = observer.getTask();
             task.execute(entry);
         } else {
-            Map<String, String> nodes = new LinkedHashMap<>();
-            nodes.put("bookXmlId", headword.getBookXmlId());
-            nodes.put("fileName", headword.getImageName());
-            Envelope en = new Envelope("GetHeadwordImage", nodes);
-            SOAP11Request<HeadwordImage> definitionRequest = requestFactory.buildRequest(
-                    URL,
-                    en,
-                    "http://tempuri.org/IItJakubService/GetHeadwordImage",
-                    HeadwordImage.class);
-            definitionRequest.registerObserver(observer);
-            definitionRequest.execute();
+            serverDataProvider.getHeadwordImageByXmlId(observer, headword);
         }
 
     }
 
-    public void getDictionaryEntryByXmlId(Headword headword) {
+    public void getDictionaryEntry(Headword headword, ListType listType) {
+        if (listType == ListType.headwordFullTextSearchList) {
+            getDictionaryEntryFromSearch(headword);
+        } else {
+            getDictionaryEntryByXmlId(headword);
+        }
+    }
+
+    private void getDictionaryEntryByXmlId(Headword headword) {
         String entry = listEntryCache.getItem(headword.getBookXmlId() + headword.getEntryXmlId());
         if (entry != null) {
             headword.setEntry(entry);
         } else {
-            Map<String, String> nodes = new LinkedHashMap<>();
-            nodes.put("bookGuid", headword.getBookXmlId());
-            nodes.put("xmlEntryId", headword.getEntryXmlId());
-            nodes.put("resultFormat", "Html");
-            nodes.put("bookType", "Dictionary");
-            Envelope en = new Envelope("GetDictionaryEntryByXmlId", nodes);
-            SOAP11Request<DictionaryEntryByXmlId> definitionRequest = requestFactory.buildRequest(
-                    URL,
-                    en,
-                    "http://tempuri.org/IItJakubService/GetDictionaryEntryByXmlId",
-                    DictionaryEntryByXmlId.class);
-            DictionaryEntryResponseObserver observer = new DictionaryEntryResponseObserver(headword);
-            definitionRequest.registerObserver(observer);
-            definitionRequest.execute();
+            serverDataProvider.getDictionaryEntryByXmlId(headword);
         }
     }
 
-    public void getDictionaryEntryFromSearch(Headword headword, String text) {
+    private void getDictionaryEntryFromSearch(Headword headword) {
         String entry = listEntryCache.getItem(headword.getBookXmlId() + headword.getEntryXmlId());
         if (entry != null) {
             headword.setEntry(entry);
         } else {
-            Map<String, String> nodes = new LinkedHashMap<>();
-            nodes.put("bookGuid", headword.getBookXmlId());
-            nodes.put("xmlEntryId", headword.getEntryXmlId());
-            nodes.put("resultFormat", "Html");
-            nodes.put("bookType", "Dictionary");
-            Envelope en = new Envelope("GetDictionaryEntryFromSearch", nodes, text);
-            SOAP11Request<DictionaryEntryFromSearch> definitionRequest = requestFactory.buildRequest(
-                    URL,
-                    en,
-                    "http://tempuri.org/IItJakubService/GetDictionaryEntryFromSearch",
-                    DictionaryEntryFromSearch.class);
-            DictionaryEntryFromSearchResponseObserver observer = new DictionaryEntryFromSearchResponseObserver(headword);
-            definitionRequest.registerObserver(observer);
-            definitionRequest.execute();
+            serverDataProvider.getDictionaryEntryFromSearch(headword, query);
         }
-    }
-
-    public void getTypeheadHeadword(SOAP11Observer observer, String query) {
-        Map<String, String> nodes = new LinkedHashMap<>();
-        nodes.put("query", query);
-        nodes.put("bookType", "Dictionary");
-        Envelope en = new Envelope("GetTypeaheadDictionaryHeadwords", nodes);
-        SOAP11Request<TypeheadHeadwords> definitionRequest = requestFactory.buildRequest(
-                URL,
-                en,
-                "http://tempuri.org/IItJakubService/GetTypeaheadDictionaryHeadwords",
-                TypeheadHeadwords.class);
-        definitionRequest.registerObserver(observer);
-        definitionRequest.execute();
     }
 
     public void addToCache(String key, String value) {
         listEntryCache.addItem(key, value);
     }
 
-    public Headword getHeadwordFromList(int position) {
-        return headwordList.get(position);
+    public Headword getHeadwordFromList(int position, ListType listType) {
+        switch (listType) {
+            case headwordList:
+                return headwordList.get(position);
+            case headwordBasicSearchList:
+                return headwordBasicSearchList.get(position);
+            case headwordFullTextSearchList:
+                return headwordFullTextSearchList.get(position);
+        }
+        return null;
     }
 
-    public int getSizeOfList() {
-        return headwordList.size();
+    public int getSizeOfList(ListType listType) {
+        switch (listType) {
+            case headwordList:
+                return headwordList.size();
+            case headwordBasicSearchList:
+                return headwordBasicSearchList.size();
+            case headwordFullTextSearchList:
+                return headwordFullTextSearchList.size();
+        }
+        return 0;
     }
 
-    public void addAllToList(List<Headword> list, boolean addToTop) {
+    public void addAllToHeadwordList(List<Headword> list, boolean addToTop, ListType listType) {
+        int size;
         if (addToTop) {
             List tmp = new ArrayList(headwordList);
             headwordList.clear();
             headwordList.addAll(list);
             headwordList.addAll(tmp);
+            notifyDataSetChanged(listType);
         } else {
-            headwordList.addAll(list);
+            switch (listType) {
+                case headwordList:
+                    size = headwordList.size();
+                    headwordList.addAll(list);
+                    headwordListAdapter.notifyItemRangeInserted(size, list.size());
+                    break;
+                case headwordBasicSearchList:
+                    size = headwordBasicSearchList.size();
+                    headwordBasicSearchList.addAll(list);
+                    headwordBasicSearchListAdapter.notifyItemRangeInserted(size, list.size());
+                    break;
+                case headwordFullTextSearchList:
+                    size = headwordFullTextSearchList.size();
+                    headwordFullTextSearchList.addAll(list);
+                    headwordFullTextSearchListAdapter.notifyItemRangeInserted(size, list.size());
+                    break;
+            }
+
         }
-        adapter.notifyDataSetChanged();
+
     }
 
-    public void addAllToList(List<Headword> list) {
-        headwordList.addAll(list);
-        adapter.notifyDataSetChanged();
+    @Nullable
+    public String getBookTitleFromXmlId(String XmlId) {
+        for (DictionaryWithCategories dictionary : dictionaryList) {
+            if (dictionary.getGuid().equals(XmlId))
+                return dictionary.getTitle();
+        }
+        return null;
     }
 
-    public void addToList(Headword headword) {
-        headwordList.add(headword);
-        adapter.notifyDataSetChanged();
+    public void clearList(ListType listType) {
+        switch (listType) {
+            case headwordList:
+                headwordList.clear();
+                break;
+            case headwordBasicSearchList:
+                headwordBasicSearchList.clear();
+                break;
+            case headwordFullTextSearchList:
+                headwordFullTextSearchList.clear();
+                break;
+        }
+        notifyDataSetChanged(listType);
     }
 
-    public void ClearList() {
-        headwordList.clear();
-    }
-
-    public void setAdapter(ListingAdapter adapter) {
-        this.adapter = adapter;
+    public void setAdapter(ListingAdapter adapter, ListType listType) {
+        switch (listType) {
+            case headwordList:
+                headwordListAdapter = adapter;
+                break;
+            case headwordBasicSearchList:
+                headwordBasicSearchListAdapter = adapter;
+                break;
+            case headwordFullTextSearchList:
+                headwordFullTextSearchListAdapter = adapter;
+                break;
+        }
     }
 
     public String[] getDictionaryListAsStringArray() {
-        String[] dictionariNames = new String[dictionaryList.size()];
+        if (dictionaryList == null || dictionaryList.size() == 0) return null;
+        String[] dictionaryNames = new String[dictionaryList.size()];
         for (int i = 0; i < dictionaryList.size(); i++) {
-            dictionariNames[i] = dictionaryList.get(i).getTitle();
+            dictionaryNames[i] = dictionaryList.get(i).getTitle();
         }
-
-        return dictionariNames;
-
+        return dictionaryNames;
     }
 
     public void setDictionaryList(List<DictionaryWithCategories> dictionaryList) {
         this.dictionaryList = dictionaryList;
         this.checkedDictionaries = new boolean[dictionaryList.size()];
-
     }
 
     public void setCheckedDictionaries(boolean[] checkedDictionaries) {
-        if(checkedDictionaries == null)return;
+        if (checkedDictionaries == null) return;
         this.checkedDictionaries = checkedDictionaries;
-        headwordList.clear();
-        adapter.notifyDataSetChanged();
-        getHeadwordList(new HeadwordListResponseObserver(), 0, 20);
+
+        if(headwordListListener != null)
+            headwordListListener.onSetChanged();
+        if(headwordBasicSearchListListener != null)
+            headwordBasicSearchListListener.onSetChanged();
+        if(headwordBasicSearchListListener != null)
+            headwordBasicSearchListListener.onSetChanged();
+
+
     }
 
-    public int getDictionaryListSize() {
-        return this.dictionaryList.size();
+    public void setDictionarySetChangedListener(DictionarySetChangedListener listener, ListType listType){
+        switch (listType) {
+            case headwordList:
+                headwordListListener = listener;
+                break;
+            case headwordBasicSearchList:
+                headwordBasicSearchListListener = listener;
+                break;
+            case headwordFullTextSearchList:
+                headwordFullTextSearchListListener= listener;
+                break;
+        }
     }
-
     public boolean[] getCheckedDictionaries() {
-
         return this.checkedDictionaries;
     }
 
-    public void addItemAndSaveSearchHistory(String newItem, Context context) {
+    public void setSearchQuery(String newItem, Context context) {
         List<String> history = getSearchHistory(context);
         SharedPreferences sharedPref = context.getSharedPreferences("history", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
@@ -306,7 +276,7 @@ public final class DataProvider {
 
         editor.putString("history", historyList.toString());
         editor.commit();
-        searchText = newItem;
+        query = newItem;
     }
 
     public List<String> getSearchHistory(Context context) {
@@ -320,4 +290,32 @@ public final class DataProvider {
         }
         return list;
     }
+
+    private void notifyDataSetChanged(ListType listType) {
+        switch (listType) {
+            case headwordList:
+                headwordListAdapter.notifyDataSetChanged();
+                break;
+            case headwordBasicSearchList:
+                headwordBasicSearchListAdapter.notifyDataSetChanged();
+                break;
+            case headwordFullTextSearchList:
+                headwordFullTextSearchListAdapter.notifyDataSetChanged();
+                break;
+        }
+    }
+
+    private List<String> getCheckedDictionariesAsList() {
+        List<String> dictionaries = new ArrayList<>();
+        if (checkedDictionaries != null) {
+            for (int i = 0; i < checkedDictionaries.length; i++) {
+                if (checkedDictionaries[i]) {
+                    dictionaries.add(dictionaryList.get(i).getId());
+                }
+            }
+        }
+        return dictionaries;
+    }
+
+
 }
