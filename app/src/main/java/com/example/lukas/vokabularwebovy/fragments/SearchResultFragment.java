@@ -24,7 +24,6 @@ public class SearchResultFragment extends Fragment {
         tabLayout = (TabLayout) view.findViewById(R.id.tabs);
         viewPager = (ViewPager) view.findViewById(R.id.viewPager);
 
-        viewPager.setAdapter(new ViewPagerAdapter(getChildFragmentManager()));
         setupViewPager(viewPager);
 
         tabLayout.setupWithViewPager(viewPager, true);
@@ -33,7 +32,7 @@ public class SearchResultFragment extends Fragment {
     }
 
     private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getActivity().getSupportFragmentManager());
+        ViewPagerAdapter adapter = new ViewPagerAdapter(getChildFragmentManager());
         adapter.addFragment(SearchTabFragment.newInstance(ListType.headwordBasicSearchList), "Hesla");
         adapter.addFragment(SearchTabFragment.newInstance(ListType.headwordFullTextSearchList), "Fulltext");
         viewPager.setAdapter(adapter);

@@ -63,7 +63,7 @@
                        android:id="@+id/image"
                        android:adjustViewBounds="true"
                        android:src="@{headword.img}"
-                       android:visibility="@{headword.isImage || headword.isReady ? View.VISIBLE : View.GONE}"
+                       android:visibility="@{headword.isImage &amp;&amp; headword.isReady ? View.VISIBLE : View.GONE}"
             />
             </LinearLayout>
         </LinearLayout>
